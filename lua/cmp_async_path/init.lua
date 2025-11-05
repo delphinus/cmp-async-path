@@ -350,13 +350,21 @@ end
 ---@return cmp_path.Option
 function source:_validate_option(params)
   local option = assert(vim.tbl_deep_extend("keep", params.option, defaults))
-  vim.validate({
+  local validations = {
     trailing_slash = { option.trailing_slash, "boolean" },
     label_trailing_slash = { option.label_trailing_slash, "boolean" },
     get_cwd = { option.get_cwd, "function" },
     show_hidden_files_by_default = { option.show_hidden_files_by_default, "boolean" },
     ---@diagnostic disable-next-line: missing-parameter
-  })
+  }
+  if vim.fn.has("nvim-0.11") == 1 then
+    for name, t in pairs(validations) do
+      local value, type = unpack(t)
+      vim.validate(name, value, type)
+    end
+  else
+    vim.validate(validations)
+  end
   return option
 end
 
